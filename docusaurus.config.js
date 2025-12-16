@@ -42,7 +42,7 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/your-username/physical-ai-humanoid-robotics/edit/main/',
+            'https://github.com/Mylife-chandafatima/ai_book_2/edit/main/',
         },
         blog: false, // Disable blog if not needed
         theme: {
@@ -132,13 +132,17 @@ const config = {
             title: 'More',
             items: [
               {
-                label: 'GitHub',
-                href: 'https://github.com/your-username/physical-ai-humanoid-robotics',
+                label: 'GitHub Profile',
+                href: 'https://github.com/Mylife-chandafatima',
+              },
+              {
+                label: 'Textbook Repository',
+                href: 'https://github.com/Mylife-chandafatima/ai_book_2',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Physical AI & Humanoid Robotics Book. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} <a href="https://github.com/Mylife-chandafatima" target="_blank" rel="noopener noreferrer">Physical AI & Humanoid Robotics Book</a>. Built with Docusaurus.`,
       },
       prism: {
         theme: lightCodeTheme,
