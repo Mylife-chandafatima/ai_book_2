@@ -14,7 +14,8 @@
     "write-heading-ids": "docusaurus write-heading-ids",
     "backend": "cd backend && python -m src.main",
     "dev": "concurrently \"npm run start\" \"npm run backend\"",
-    "dev:backend": "cd backend && uvicorn src.main:app --reload --port 8000"
+    "dev:backend": "cd backend && uvicorn src.main:app --reload --port 8000",
+    "gh-pages": "docusaurus deploy"
   },
   "dependencies": {
     "@docusaurus/core": "^3.0.0",
