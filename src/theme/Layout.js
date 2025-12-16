@@ -9,10 +9,13 @@ export default function Layout(props) {
   // Since Docusaurus runs client-side after hydration,
   // we can safely check if we're in the browser environment
   const [showChatbot, setShowChatbot] = React.useState(false);
+  const [showTranslator, setShowTranslator] = React.useState(false);
 
   React.useEffect(() => {
     // Enable chatbot in all environments to make it visible
     setShowChatbot(true);
+    // The translator is now on its own page, so we don't show it here
+    setShowTranslator(false);
   }, []);
 
   return (

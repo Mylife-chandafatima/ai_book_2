@@ -70,24 +70,78 @@ export default function Home() {
           textAlign: "center",
           background: "linear-gradient(135deg, #0b0f19, #1f2a44)",
           color: "white",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <h1 style={{ fontSize: "54px", fontWeight: "bold", marginBottom: "20px" }}>
-          Physical AI & Humanoid Robotics Textbook
-        </h1>
-        <p style={{ fontSize: "22px", maxWidth: "850px", margin: "0 auto", lineHeight: "1.6" }}>
-          A complete and practical learning system where you master the future:
-          humanoid robotics, ROS 2, large action models, simulation, VLA systems, hardware,
-          and advanced AI for next-generation intelligent machines.
-        </p>
+        {/* Decorative robot graphics */}
+        <div style={{
+          position: "absolute",
+          top: "20px",
+          left: "20px",
+          opacity: 0.1,
+          fontSize: "120px",
+          transform: "rotate(-20deg)"
+        }}>
+          🤖
+        </div>
+        <div style={{
+          position: "absolute",
+          bottom: "20px",
+          right: "20px",
+          opacity: 0.1,
+          fontSize: "120px",
+          transform: "rotate(15deg)"
+        }}>
+          🤖
+        </div>
 
-        <div style={{ marginTop: "40px" }}>
-          <Link
-            className="button button--primary button--lg"
-            to="/docs/intro"
-          >
-            Start Reading →
-          </Link>
+        <div style={{ position: "relative", zIndex: 1 }}>
+          {/* Robot image container */}
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "30px",
+            filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.3))"
+          }}>
+            <div style={{
+              fontSize: "100px",
+              background: "rgba(255,255,255,0.1)",
+              borderRadius: "50%",
+              width: "180px",
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "2px solid rgba(255,255,255,0.2)"
+            }}>
+              🤖
+            </div>
+          </div>
+
+          <h1 style={{ fontSize: "54px", fontWeight: "bold", marginBottom: "20px" }}>
+            Physical AI & Humanoid Robotics Textbook
+          </h1>
+          <p style={{ fontSize: "22px", maxWidth: "850px", margin: "0 auto", lineHeight: "1.6" }}>
+            A complete and practical learning system where you master the future:
+            humanoid robotics, ROS 2, large action models, simulation, VLA systems, hardware,
+            and advanced AI for next-generation intelligent machines.
+          </p>
+
+          <div style={{ marginTop: "40px", display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap" }}>
+            <Link
+              className="button button--primary button--lg"
+              to="/docs/intro"
+            >
+              Start Reading →
+            </Link>
+            <Link
+              className="button button--secondary button--lg"
+              to="/translator"
+            >
+              🌐 Translator
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -120,7 +174,10 @@ export default function Home() {
         >
           {/* MODULE 1 */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>Module 1: The Robotic Nervous System (ROS 2)</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>🔧</span>
+              <h3 style={cardTitle}>Module 1: The Robotic Nervous System (ROS 2)</h3>
+            </div>
             <p style={cardText}>
               Learn ROS 2 — the nervous system of modern robots. Build nodes, topics,
               services, actions, publishers, subscribers, QoS, and real robot workflows.
@@ -139,7 +196,10 @@ export default function Home() {
 
           {/* MODULE 2 */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>Module 2: Robot Perception</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>👁️</span>
+              <h3 style={cardTitle}>Module 2: Robot Perception</h3>
+            </div>
             <p style={cardText}>
               Master computer vision, sensor fusion, SLAM algorithms, and perception
               systems for robots to understand their environment.
@@ -157,7 +217,10 @@ export default function Home() {
 
           {/* MODULE 3 */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>Module 3: Navigation & Mapping</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>🧭</span>
+              <h3 style={cardTitle}>Module 3: Navigation & Mapping</h3>
+            </div>
             <p style={cardText}>
               Learn how robots navigate and map environments using localization,
               path planning, and mapping algorithms.
@@ -175,7 +238,10 @@ export default function Home() {
 
           {/* MODULE 4 */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>Module 4: Motion Control</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>⚙️</span>
+              <h3 style={cardTitle}>Module 4: Motion Control</h3>
+            </div>
             <p style={cardText}>
               Understand control theory, trajectory generation, locomotion, and manipulation
               for precise robot movement and interaction.
@@ -193,7 +259,10 @@ export default function Home() {
 
           {/* MODULE 5 */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>Module 5: Learning & Adaptation</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>🧠</span>
+              <h3 style={cardTitle}>Module 5: Learning & Adaptation</h3>
+            </div>
             <p style={cardText}>
               Explore machine learning, reinforcement learning, imitation learning,
               and adaptation methods for intelligent robots.
@@ -211,7 +280,10 @@ export default function Home() {
 
           {/* MODULE 6 */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>Module 6: Applications & Integration</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>🏭</span>
+              <h3 style={cardTitle}>Module 6: Applications & Integration</h3>
+            </div>
             <p style={cardText}>
               Discover real-world applications, human-robot interaction, industrial use cases,
               and emerging trends in robotics.
@@ -229,7 +301,10 @@ export default function Home() {
 
           {/* REFERENCES */}
           <div style={cardStyle}>
-            <h3 style={cardTitle}>References & Resources</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+              <span style={{ fontSize: '24px', marginRight: '10px' }}>📚</span>
+              <h3 style={cardTitle}>References & Resources</h3>
+            </div>
             <p style={cardText}>
               Glossary, research papers, references, external resources, and further reading
               for mastering robotics and AI.
@@ -249,14 +324,15 @@ export default function Home() {
 
         <div
           style={{
-            maxWidth: "1000px",
+            maxWidth: "1200px",
             margin: "0 auto",
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: "35px",
           }}
         >
-          <div style={featureBox}>
+          <div style={{...featureBox, textAlign: "center"}}>
+            <div style={{ fontSize: "40px", marginBottom: "15px" }}>🧠</div>
             <h3>AI-Driven Design</h3>
             <p>
               Built fully around modern robotics workflows, from LLM agents to VLA systems
@@ -264,7 +340,8 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={featureBox}>
+          <div style={{...featureBox, textAlign: "center"}}>
+            <div style={{ fontSize: "40px", marginBottom: "15px" }}>🔧</div>
             <h3>Hands-On Learning</h3>
             <p>
               Every module includes practical steps, code examples, simulations, and
@@ -272,7 +349,8 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={featureBox}>
+          <div style={{...featureBox, textAlign: "center"}}>
+            <div style={{ fontSize: "40px", marginBottom: "15px" }}>🏭</div>
             <h3>Industry-Inspired Curriculum</h3>
             <p>
               The content reflects what Tesla Bots, Figure AI, Apptronik, and Sanctuary AI

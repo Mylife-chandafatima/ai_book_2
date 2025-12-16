@@ -66,10 +66,10 @@ const config = {
         enableChatbot: true,
       },
       navbar: {
-        title: 'Physical AI & Humanoid Robotics',
+        title: '🤖 Physical AI & Robotics',
         logo: {
           alt: 'Robotics Book Logo',
-          src: 'img/logo.svg',
+          src: 'img/logo.svg', // Use the existing logo or favicon
         },
         items: [
           {
@@ -84,8 +84,13 @@ const config = {
             position: 'left',
           },
           {
-            href: 'https://github.com/your-username/physical-ai-humanoid-robotics',
-            label: 'GitHub',
+            href: 'https://github.com/Mylife-chandafatima',
+            label: 'GitHub Profile',
+            position: 'right',
+          },
+          {
+            href: 'https://github.com/Mylife-chandafatima/ai_book_2',
+            label: 'Textbook Repo',
             position: 'right',
           },
         ],
