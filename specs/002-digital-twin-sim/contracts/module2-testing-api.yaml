@@ -1,0 +1,358 @@
+openapi: 3.0.0
+info:
+  title: Module 2 Testing API - Digital Twin (Gazebo & Unity)
+  description: API for validating Module 2 content on Digital Twin technologies
+  version: 1.0.0
+
+paths:
+  /validate/module2/build:
+    post:
+      summary: Validate Docusaurus build for Module 2
+      description: Check if Module 2 documentation builds without errors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module to validate (specifically module-2-digital-twin)
+                  example: "module-2-digital-twin"
+      responses:
+        '200':
+          description: Module 2 build validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the Module 2 build was successful
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    description: List of Module 2 build errors if any
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    description: List of Module 2 build warnings
+
+  /validate/module2/formatting:
+    post:
+      summary: Validate formatting consistency in Module 2
+      description: Check MDX, Markdown, and code block formatting in Module 2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module 2 to validate
+                  example: "module-2-digital-twin"
+                format_types:
+                  type: array
+                  items:
+                    type: string
+                    enum: [mdx, markdown, code_blocks, images, diagrams]
+                  description: Types of formatting to validate in Module 2
+      responses:
+        '200':
+          description: Module 2 formatting validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  issues:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FormattingIssue'
+
+  /validate/module2/gazebo:
+    post:
+      summary: Validate Gazebo simulations for Module 2
+      description: Test Gazebo examples and simulations in Module 2 for proper behavior
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                simulation_path:
+                  type: string
+                  description: Path to the Gazebo simulation to validate
+                  example: "examples/gazebo-examples/simple_world.world"
+                expected_physics:
+                  type: object
+                  description: Expected physics behavior
+                  properties:
+                    gravity:
+                      type: number
+                      description: Expected gravity value
+                    collision_detection:
+                      type: boolean
+                      description: Whether collision detection should work
+      responses:
+        '200':
+          description: Gazebo validation result for Module 2
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationValidationResult'
+
+  /validate/module2/unity:
+    post:
+      summary: Validate Unity simulations for Module 2
+      description: Test Unity examples and scenes in Module 2 for proper rendering
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scene_path:
+                  type: string
+                  description: Path to the Unity scene to validate
+                  example: "examples/unity-examples/humanoid_scene.unity"
+                expected_rendering:
+                  type: object
+                  description: Expected rendering behavior
+                  properties:
+                    lighting:
+                      type: boolean
+                      description: Whether lighting should be properly configured
+                    textures:
+                      type: boolean
+                      description: Whether textures should be properly applied
+      responses:
+        '200':
+          description: Unity validation result for Module 2
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationValidationResult'
+
+  /validate/module2/sensors:
+    post:
+      summary: Validate sensor simulations for Module 2
+      description: Test LiDAR, Depth Camera, and IMU simulations in Module 2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sensor_type:
+                  type: string
+                  enum: [lidar, depth_camera, imu]
+                  description: Type of sensor to validate
+                simulation_path:
+                  type: string
+                  description: Path to the sensor simulation to validate
+                  example: "examples/gazebo-examples/sensor_model.urdf"
+      responses:
+        '200':
+          description: Sensor validation result for Module 2
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  sensor_type:
+                    type: string
+                    enum: [lidar, depth_camera, imu]
+                  data_quality:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Quality score for sensor data (0-1)
+                  accuracy_metrics:
+                    type: object
+                    description: Accuracy metrics for the sensor simulation
+
+  /validate/module2/citations:
+    post:
+      summary: Validate citations and references for Module 2
+      description: Check that Module 2 citations follow APA style
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module 2 to validate citations for
+                  example: "module-2-digital-twin"
+      responses:
+        '200':
+          description: Module 2 citation validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  valid_citations:
+                    type: integer
+                    description: Number of valid citations in Module 2
+                  invalid_citations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Citation'
+                    description: Citations that don't follow APA style in Module 2
+                  peer_reviewed_count:
+                    type: integer
+                    description: Number of peer-reviewed citations in Module 2
+                  total_references:
+                    type: integer
+                    description: Total number of references in Module 2
+
+  /validate/module2/rag-content:
+    post:
+      summary: Validate RAG chatbot responses for Module 2
+      description: Test that RAG chatbot responds correctly to queries about Module 2 content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Query to test against Module 2 content
+                  example: "How do I set up a Gazebo simulation for humanoid robots?"
+                expected_source:
+                  type: string
+                  description: Expected source document in Module 2
+                  example: "gazebo-simulation.md"
+      responses:
+        '200':
+          description: Module 2 RAG validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  query:
+                    type: string
+                    description: The original query
+                  response:
+                    type: string
+                    description: The RAG chatbot's response
+                  source_accuracy:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Accuracy score for source attribution (0-1)
+                  content_relevance:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Relevance score for content (0-1)
+
+components:
+  schemas:
+    ValidationResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the validation was successful
+        details:
+          type: string
+          description: Additional validation details
+        execution_time:
+          type: number
+          format: float
+          description: Time taken to execute validation in seconds
+
+    SimulationValidationResult:
+      allOf:
+        - $ref: '#/components/schemas/ValidationResult'
+        - type: object
+          properties:
+            expected_behavior:
+              type: string
+              description: What the simulation should do
+            actual_behavior:
+              type: string
+              description: What the simulation actually did
+            match:
+              type: boolean
+              description: Whether expected and actual behavior match
+            platform:
+              type: string
+              enum: [gazebo, unity]
+              description: Platform where the simulation was tested
+
+    FormattingIssue:
+      type: object
+      properties:
+        file_path:
+          type: string
+          description: Path to the file with the issue
+        line_number:
+          type: integer
+          description: Line number where the issue occurs
+        issue_type:
+          type: string
+          enum: [mdx_syntax, markdown_syntax, code_block, image_alt_text, link_broken]
+          description: Type of formatting issue
+        description:
+          type: string
+          description: Description of the issue
+        severity:
+          type: string
+          enum: [error, warning]
+          description: Severity of the issue
+
+    Citation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the citation
+        title:
+          type: string
+          description: Title of the reference
+        authors:
+          type: array
+          items:
+            type: string
+          description: List of authors
+        year:
+          type: integer
+          description: Publication year
+        apa_citation:
+          type: string
+          description: The actual APA citation text
+        peer_reviewed:
+          type: boolean
+          description: Whether the citation is peer-reviewed
+        module:
+          type: string
+          description: Module where the citation is used

@@ -1,0 +1,295 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API for Physical AI & Humanoid Robotics Book
+  description: API for the Retrieval-Augmented Generation chatbot that provides answers based on the book content
+  version: 1.0.0
+servers:
+  - url: https://api.physical-ai-book.com/v1
+    description: Production server
+  - url: https://staging-api.physical-ai-book.com/v1
+    description: Staging server
+
+paths:
+  /chat:
+    post:
+      summary: Send a message to the RAG chatbot
+      description: Submit a user query and receive a response based on book content with citations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response from the chatbot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Invalid request format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /search:
+    post:
+      summary: Search book content
+      description: Search for specific content across all book modules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid request format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /modules:
+    get:
+      summary: Get list of available modules
+      description: Retrieve information about all book modules
+      responses:
+        '200':
+          description: List of modules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleListResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+        - context
+      properties:
+        message:
+          type: string
+          description: The user's query message
+          example: "How do I create a ROS 2 node for humanoid control?"
+        context:
+          type: string
+          description: The current module context (optional)
+          example: "module-1-ros2"
+        user_id:
+          type: string
+          description: Optional user identifier for conversation history
+          example: "user-12345"
+
+    ChatResponse:
+      type: object
+      required:
+        - response
+        - sources
+        - confidence
+      properties:
+        response:
+          type: string
+          description: The chatbot's response to the query
+          example: "To create a ROS 2 node for humanoid control, you first need to initialize the rclpy library..."
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Source'
+          description: List of sources used in the response
+        confidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Confidence score for the response
+          example: 0.92
+        follow_up_questions:
+          type: array
+          items:
+            type: string
+          description: Suggested follow-up questions
+          example: ["What are the different types of ROS 2 nodes?", "How do I debug ROS 2 nodes?"]
+
+    SearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: The search query
+          example: "VSLAM implementation in NVIDIA Isaac"
+        module_filter:
+          type: string
+          description: Optional filter to search within a specific module
+          example: "module-3-nvidia-isaac"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Maximum number of results to return
+
+    SearchResponse:
+      type: object
+      required:
+        - results
+        - total_count
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+        total_count:
+          type: integer
+          description: Total number of matching results
+        query_time_ms:
+          type: number
+          format: float
+          description: Time taken to execute the search in milliseconds
+
+    SearchResult:
+      type: object
+      required:
+        - id
+        - title
+        - content
+        - module
+        - relevance_score
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the content
+        title:
+          type: string
+          description: Title of the content section
+        content:
+          type: string
+          description: Snippet of the content
+        module:
+          type: string
+          description: Module where the content is located
+        relevance_score:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Relevance score for the search result
+
+    Source:
+      type: object
+      required:
+        - title
+        - module
+        - section
+        - url
+      properties:
+        title:
+          type: string
+          description: Title of the source content
+          example: "Creating ROS 2 Nodes"
+        module:
+          type: string
+          description: Module where the source is located
+          example: "module-1-ros2"
+        section:
+          type: string
+          description: Specific section within the module
+          example: "nodes-topics-services"
+        url:
+          type: string
+          format: uri
+          description: URL to the source content
+          example: "https://physical-ai-book.com/docs/module-1-ros2/nodes-topics-services"
+
+    Module:
+      type: object
+      required:
+        - id
+        - title
+        - number
+        - description
+        - word_count
+        - references_count
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the module
+          example: "module-1-ros2"
+        title:
+          type: string
+          description: Full title of the module
+          example: "Module 1: The Robotic Nervous System (ROS 2)"
+        number:
+          type: integer
+          description: Sequential module number
+          example: 1
+        description:
+          type: string
+          description: Brief description of the module
+          example: "Introduction to ROS 2 concepts for humanoid robot control"
+        word_count:
+          type: integer
+          description: Approximate word count of the module
+          example: 1350
+        references_count:
+          type: integer
+          description: Number of references in the module
+          example: 7
+
+    ModuleListResponse:
+      type: object
+      required:
+        - modules
+      properties:
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Module'
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "BAD_REQUEST"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Request body is missing required fields"
+        details:
+          type: object
+          description: Additional error details (optional)

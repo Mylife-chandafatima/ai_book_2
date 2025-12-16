@@ -1,55 +1,48 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!-- Sync Impact Report:
+Version change: N/A -> 1.0.0
+Added sections: All principles and sections based on project requirements
+Removed sections: None
+Templates requiring updates: N/A
+Follow-up TODOs: None
+-->
+# AI/Spec-Driven Book on Physical AI & Humanoid Robotics Constitution
+
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
-
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
-
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
-
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
-
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
-
-### [PRINCIPLE_6_NAME]
+### Accuracy & Verifiability
+All factual claims must be traceable to sources. Minimum 50% peer-reviewed articles. Use APA citation format consistently. Plagiarism tolerance: 0%.
 
 
-[PRINCIPLE__DESCRIPTION]
+### Clarity & Audience Awareness
+Content is structured for Docusaurus deployment and GitHub Pages publication. Writing should target an academic audience with computer science background. Flesch-Kincaid grade 10–12 readability. Concepts must be explained clearly, step-by-step for technical implementation.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### Reproducibility & Rigor
+Ensure all code examples, simulation steps, and robotics pipelines are reproducible. Include citations and references for algorithms, ROS 2 usage, Gazebo simulations, NVIDIA Isaac AI platform, and VLA integration. Validate results using simulation and code examples where applicable.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### Comprehensiveness & Modular Structure
+Cover all modules: ROS 2, Digital Twin (Gazebo & Unity), NVIDIA Isaac, Vision-Language-Action (VLA), Conversational AI. Each module should include: objectives, background, implementation steps, and references. Maintain logical flow to support both educational and research purposes.
+
+
+### AI & Tool Integration
+Use Claude Code and Spec-Kit Plus to generate chapters. Embed RAG chatbot integration instructions. Book and chatbot integration are fully functional and deployable.
+
+
+### Ethics & Safety
+AI-generated content must comply with ethical standards. Robotics instructions should emphasize safe simulation and real-world deployment practices.
+
+
+## Project Constraints
+Word count: 5,000–7,000 words. Minimum 15 references. Output format: PDF with embedded citations. All code snippets and robotics instructions must be executable and properly commented.
+
+
+## Success Criteria
+Claims are verified against sources. Zero plagiarism detected. Passes internal fact-checking. Ethics & Safety: AI-generated content must comply with ethical standards. Robotics instructions should emphasize safe simulation and real-world deployment practices.
+
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+All implementations must follow the specified principles. Each chapter/module must include proper citations and references. Code examples must be tested and validated. Project must maintain academic integrity and safety standards.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-15 | **Last Amended**: 2025-12-15

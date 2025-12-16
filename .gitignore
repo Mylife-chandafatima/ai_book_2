@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+
+# Builds
+.build/
+build/
+.docusaurus/
+.dist/
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Backend related
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Backend build outputs
+backend/__pycache__/
+backend/*.pyc
+
+# Large files that should not be in Git
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# Specific to your project
+nul
+.history/

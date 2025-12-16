@@ -1,0 +1,307 @@
+---
+sidebar_position: 3
+title: 'Module 2: Computer Vision for Robotics'
+---
+
+# Module 2: Computer Vision for Robotics
+
+## Overview
+
+Computer vision is a critical component of robot perception, enabling robots to interpret visual information from their environment. This module covers fundamental computer vision techniques specifically tailored for humanoid robotics applications, including object recognition, scene understanding, and visual SLAM.
+
+
+## Learning Objectives
+
+By the end of this module, students will be able to:
+- Implement basic computer vision algorithms for robotics
+- Understand the role of visual SLAM in robot navigation
+- Design vision-based perception systems for humanoid robots
+- Evaluate computer vision system performance
+
+## Introduction to Robot Vision
+
+Robot vision differs from traditional computer vision in several key ways:
+
+1. **Real-time Processing**: Robots operate in real-time environments requiring immediate responses
+2. **Embodied Perception**: The robot's movement affects visual input and interpretation
+3. **Multi-sensor Integration**: Vision must be combined with other sensors for robust operation
+4. **Action-Oriented**: Visual processing serves specific robotic tasks rather than pure analysis
+
+### Robot Sensor Architecture
+
+The diagram above illustrates a typical sensor architecture for a humanoid robot, showing how visual sensors integrate with other sensing modalities.
+
+## Visual SLAM Systems
+
+Visual SLAM (Simultaneous Localization and Mapping) enables robots to build maps of unknown environments while simultaneously localizing themselves within those maps. This is particularly important for humanoid robots operating in human environments.
+
+### VSLAM Pipeline
+
+The visual SLAM pipeline consists of several key stages:
+
+1. **Camera Input**: Raw image capture from monocular, stereo, or RGB-D cameras
+2. **Feature Detection**: Extraction of distinctive visual features (corners, edges, etc.)
+3. **Feature Matching**: Correspondence between features in consecutive frames
+4. **Pose Estimation**: Calculation of camera motion between frames
+5. **Map Building**: Construction of a consistent map of the environment
+
+### Feature Detection Algorithms
+
+Common feature detection algorithms used in robotics include:
+
+- **ORB (Oriented FAST and Rotated BRIEF)**: Fast and rotation-invariant
+- **SIFT (Scale-Invariant Feature Transform)**: Robust to scale and rotation changes
+- **SURF (Speeded-Up Robust Features)**: Faster alternative to SIFT
+- **FAST (Features from Accelerated Segment Test)**: Very fast corner detector
+
+## ROS2 Computer Vision Implementation
+
+Here's an example of implementing a feature detection node in ROS2:
+
+```python
+#!/usr/bin/env python3
+
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import cv2
+import numpy as np
+
+class FeatureDetectionNode(Node):
+    """
+    ROS2 node for detecting visual features in camera images.
+    """
+
+    def __init__(self):
+        super().__init__('feature_detection_node')
+
+        # Initialize OpenCV bridge
+        self.bridge = CvBridge()
+
+        # Create subscriber for camera images
+        self.image_sub = self.create_subscription(
+            Image,
+            '/camera/image_raw',
+            self.image_callback,
+            10
+        )
+
+        # Create publisher for annotated images
+        self.annotated_pub = self.create_publisher(
+            Image,
+            '/camera/features_annotated',
+            10
+        )
+
+        # Initialize feature detector (ORB in this case)
+        self.feature_detector = cv2.ORB_create(nfeatures=500)
+
+        self.get_logger().info('Feature detection node initialized')
+
+    def image_callback(self, msg):
+        """Process incoming camera images and detect features."""
+        try:
+            # Convert ROS Image message to OpenCV image
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+
+            # Convert to grayscale for feature detection
+            gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+
+            # Detect features
+            keypoints = self.feature_detector.detect(gray, None)
+
+            # Draw keypoints on the image
+            annotated_image = cv2.drawKeypoints(
+                cv_image,
+                keypoints,
+                None,
+                color=(0, 255, 0),
+                flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+            )
+
+            # Convert back to ROS Image message
+            annotated_msg = self.bridge.cv2_to_imgmsg(annotated_image, encoding='bgr8')
+            annotated_msg.header = msg.header
+
+            # Publish annotated image
+            self.annotated_pub.publish(annotated_msg)
+
+        except Exception as e:
+            self.get_logger().error(f'Error processing image: {str(e)}')
+
+def main(args=None):
+    rclpy.init(args=args)
+
+    feature_node = FeatureDetectionNode()
+
+    try:
+        rclpy.spin(feature_node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        feature_node.destroy_node()
+        rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## Deep Learning for Robot Vision
+
+Deep learning has revolutionized computer vision for robotics, enabling more sophisticated scene understanding and object recognition capabilities.
+
+### Convolutional Neural Networks for Robotics
+
+CNNs are particularly well-suited for robot vision due to their ability to:
+- Learn hierarchical feature representations
+- Handle variations in lighting and viewpoint
+- Process spatial relationships in images
+- Operate in real-time with optimized implementations
+
+### Object Detection in Robotics
+
+Object detection algorithms like YOLO, SSD, and Faster R-CNN can be adapted for robotic applications:
+
+```python
+import torch
+import torchvision.transforms as transforms
+from PIL import Image
+import cv2
+import numpy as np
+
+class RobotObjectDetector:
+    """
+    Object detection system for humanoid robots using PyTorch.
+    """
+
+    def __init__(self, model_path=None):
+        # Load pre-trained object detection model
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
+        self.model.eval()
+
+        # COCO dataset class names for object detection
+        self.class_names = [
+            'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
+            'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign',
+            'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep',
+            'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella',
+            'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard',
+            'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard',
+            'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork',
+            'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
+            'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair',
+            'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv',
+            'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
+            'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
+            'scissors', 'teddy bear', 'hair drier', 'toothbrush'
+        ]
+
+    def detect_objects(self, image):
+        """
+        Detect objects in an image and return bounding boxes and labels.
+
+        Args:
+            image: Input image (numpy array or PIL Image)
+
+        Returns:
+            List of detections with bounding boxes and confidence scores
+        """
+        # Run inference
+        results = self.model(image)
+
+        # Extract detections
+        detections = []
+        for det in results.xyxy[0]:  # x1, y1, x2, y2, conf, cls
+            x1, y1, x2, y2, conf, cls = det
+            detections.append({
+                'bbox': [float(x1), float(y1), float(x2), float(y2)],
+                'confidence': float(conf),
+                'class_id': int(cls),
+                'class_name': self.class_names[int(cls)]
+            })
+
+        return detections
+
+    def annotate_image(self, image, detections):
+        """
+        Draw bounding boxes and labels on image.
+
+        Args:
+            image: Input image
+            detections: List of detections from detect_objects
+
+        Returns:
+            Image with annotations
+        """
+        annotated_image = image.copy()
+
+        for det in detections:
+            x1, y1, x2, y2 = det['bbox']
+            label = f"{det['class_name']} {det['confidence']:.2f}"
+
+            # Draw bounding box
+            cv2.rectangle(annotated_image, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+
+            # Draw label
+            cv2.putText(
+                annotated_image,
+                label,
+                (int(x1), int(y1)-10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                2
+            )
+
+        return annotated_image
+```
+
+## Navigation and Path Planning
+
+Effective navigation requires integrating visual perception with path planning algorithms. The navigation stack for humanoid robots typically includes multiple layers:
+
+
+### Path Planning Algorithms
+
+Common path planning algorithms for humanoid robots include:
+
+- **A* Algorithm**: Optimal pathfinding in known environments
+- **Dijkstra's Algorithm**: Shortest path computation
+- **RRT (Rapidly-exploring Random Trees)**: Sampling-based planning for high-dimensional spaces
+- **Potential Fields**: Gradient-based navigation with attractive and repulsive forces
+
+## Performance Considerations
+
+### Real-time Processing
+
+Robot vision systems must operate within strict timing constraints:
+
+- **Frame Rate**: Typically 10-30 FPS for stable perception
+- **Latency**: Minimize delay between image capture and action
+- **Throughput**: Process images efficiently to avoid bottlenecks
+
+### Computational Efficiency
+
+Considerations for efficient vision processing on humanoid robots:
+
+- **Model Compression**: Use quantized or pruned neural networks
+- **Edge Computing**: Deploy models on robot's onboard processors
+- **Selective Processing**: Focus computational resources on relevant regions
+
+## Chapter Summary
+
+This module covered computer vision fundamentals for robotics, including visual SLAM, feature detection, and deep learning approaches. We explored ROS2 implementations and discussed the integration of vision systems within the broader navigation stack of humanoid robots.
+
+## References
+
+1. Szeliski, R. (2022). *Computer Vision: Algorithms and Applications*. Springer.
+2. Thrun, S., Burgard, W., & Fox, D. (2005). *Probabilistic Robotics*. MIT Press.
+3. Mur-Artal, R., Montiel, J. M. M., & Tardós, J. D. (2015). ORB-SLAM: a versatile and accurate monocular SLAM system. *IEEE Transactions on Robotics*, 31(5), 1147-1163.
+4. Redmon, J., & Farhadi, A. (2018). YOLOv3: An incremental improvement. *arXiv preprint arXiv:1804.02767*.
+
+---
+
+## Next Steps
+
+Continue to [Module 2: VSLAM Systems](./vslam-systems.md) to learn about advanced visual SLAM techniques for humanoid robots.

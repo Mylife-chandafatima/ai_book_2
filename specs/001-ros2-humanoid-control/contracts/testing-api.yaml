@@ -1,0 +1,268 @@
+openapi: 3.0.0
+info:
+  title: Testing API for Physical AI & Humanoid Robotics Book
+  description: API for validating the quality, accuracy, and reproducibility of book content
+  version: 1.0.0
+
+paths:
+  /validate/build:
+    post:
+      summary: Validate Docusaurus build
+      description: Check if the documentation builds without errors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module to validate (optional, if omitted validates all)
+                  example: "module-1-ros2"
+      responses:
+        '200':
+          description: Build validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the build was successful
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    description: List of build errors if any
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    description: List of build warnings
+
+  /validate/formatting:
+    post:
+      summary: Validate formatting consistency
+      description: Check MDX, Markdown, and code block formatting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module to validate
+                  example: "module-2-digital-twin"
+                format_types:
+                  type: array
+                  items:
+                    type: string
+                    enum: [mdx, markdown, code_blocks, images]
+                  description: Types of formatting to validate
+      responses:
+        '200':
+          description: Formatting validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  issues:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FormattingIssue'
+
+  /validate/ros2:
+    post:
+      summary: Validate ROS2 nodes, topics, and services
+      description: Test ROS2 examples for proper functionality
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                example_path:
+                  type: string
+                  description: Path to the ROS2 example to validate
+                  example: "examples/ros2-examples/simple_node.py"
+      responses:
+        '200':
+          description: ROS2 validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+
+  /validate/simulation:
+    post:
+      summary: Validate Gazebo/Unity simulations
+      description: Test simulation examples for proper behavior
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                simulation_path:
+                  type: string
+                  description: Path to the simulation to validate
+                  example: "examples/gazebo-examples/simple_world.world"
+                platform:
+                  type: string
+                  enum: [gazebo, unity]
+                  description: Platform to run the simulation on
+      responses:
+        '200':
+          description: Simulation validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationValidationResult'
+
+  /validate/isaac:
+    post:
+      summary: Validate NVIDIA Isaac AI pipelines
+      description: Test Isaac examples for proper functionality
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                example_path:
+                  type: string
+                  description: Path to the Isaac example to validate
+                  example: "examples/isaac-examples/vslam_pipeline.py"
+      responses:
+        '200':
+          description: Isaac validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+
+  /validate/citations:
+    post:
+      summary: Validate citations and references
+      description: Check that all citations follow APA style
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module to validate citations for
+                  example: "module-3-nvidia-isaac"
+      responses:
+        '200':
+          description: Citation validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  valid_citations:
+                    type: integer
+                    description: Number of valid citations
+                  invalid_citations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Citation'
+                    description: Citations that don't follow APA style
+                  peer_reviewed_count:
+                    type: integer
+                    description: Number of peer-reviewed citations
+                  total_references:
+                    type: integer
+                    description: Total number of references
+
+components:
+  schemas:
+    ValidationResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the validation was successful
+        details:
+          type: string
+          description: Additional validation details
+        execution_time:
+          type: number
+          format: float
+          description: Time taken to execute validation in seconds
+
+    SimulationValidationResult:
+      allOf:
+        - $ref: '#/components/schemas/ValidationResult'
+        - type: object
+          properties:
+            expected_behavior:
+              type: string
+              description: What the simulation should do
+            actual_behavior:
+              type: string
+              description: What the simulation actually did
+            match:
+              type: boolean
+              description: Whether expected and actual behavior match
+
+    FormattingIssue:
+      type: object
+      properties:
+        file_path:
+          type: string
+          description: Path to the file with the issue
+        line_number:
+          type: integer
+          description: Line number where the issue occurs
+        issue_type:
+          type: string
+          enum: [mdx_syntax, markdown_syntax, code_block, image_alt_text, link_broken]
+          description: Type of formatting issue
+        description:
+          type: string
+          description: Description of the issue
+        severity:
+          type: string
+          enum: [error, warning]
+          description: Severity of the issue
+
+    Citation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the citation
+        title:
+          type: string
+          description: Title of the reference
+        authors:
+          type: array
+          items:
+            type: string
+          description: List of authors
+        year:
+          type: integer
+          description: Publication year
+        apa_citation:
+          type: string
+          description: The actual APA citation text
+        peer_reviewed:
+          type: boolean
+          description: Whether the citation is peer-reviewed

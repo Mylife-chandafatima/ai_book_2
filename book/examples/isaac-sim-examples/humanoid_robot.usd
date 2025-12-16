@@ -1,0 +1,146 @@
+#usda 1.0
+# This is a minimal USD representation of a humanoid robot for Isaac Sim
+# This file serves as a placeholder for a more complex robot model
+
+def MdlFileAPI (mdlPath = "Isaac/Behaviors/Mdls/humanoid.mdl")
+{
+    prepend apiSchemas = ["MdlFileAPI"]
+}
+
+def Xform "World"
+{
+    def Xform "HumanoidRobot"
+    {
+        # Root joint
+        def Xform "pelvis"
+        {
+            # Spine and head
+            def Xform "spine"
+            {
+                def Xform "chest"
+                {
+                    def Xform "neck"
+                    {
+                        def Xform "head"
+                        {
+                            # Eyes for visual sensors
+                            def Sphere "left_eye"
+                            {
+                                matrix4d xformOp:transform = ( ( 0.01, 0, 0, 0 ), ( 0, 0.01, 0, 0 ), ( 0, 0, 0.01, 0 ), ( -0.05, -0.03, 0.05, 1 ) )
+                                float radius = 0.01
+                            }
+
+                            def Sphere "right_eye"
+                            {
+                                matrix4d xformOp:transform = ( ( 0.01, 0, 0, 0 ), ( 0, 0.01, 0, 0 ), ( 0, 0, 0.01, 0 ), ( -0.05, 0.03, 0.05, 1 ) )
+                                float radius = 0.01
+                            }
+                        }
+                    }
+
+                    # Left arm
+                    def Xform "left_shoulder"
+                    {
+                        def Xform "left_upper_arm"
+                        {
+                            def Xform "left_lower_arm"
+                            {
+                                def Xform "left_hand"
+                                {
+                                    def Sphere "left_gripper"
+                                    {
+                                        float radius = 0.02
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    # Right arm
+                    def Xform "right_shoulder"
+                    {
+                        def Xform "right_upper_arm"
+                        {
+                            def Xform "right_lower_arm"
+                            {
+                                def Xform "right_hand"
+                                {
+                                    def Sphere "right_gripper"
+                                    {
+                                        float radius = 0.02
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            # Left leg
+            def Xform "left_hip"
+            {
+                def Xform "left_upper_leg"
+                {
+                    def Xform "left_lower_leg"
+                    {
+                        def Xform "left_foot"
+                        {
+                        }
+                    }
+                }
+            }
+
+            # Right leg
+            def Xform "right_hip"
+            {
+                def Xform "right_upper_leg"
+                {
+                    def Xform "right_lower_leg"
+                    {
+                        def Xform "right_foot"
+                        {
+                        }
+                    }
+                }
+            }
+        }
+
+        # Add collision and rigid body properties to each part
+        # These would be more detailed in a real robot model
+        def Capsule "pelvis_collision"
+        {
+            float radius = 0.1
+            float height = 0.2
+            add rel physics:collidesWith = [</World/HumanoidRobot/pelvis>]
+        }
+    }
+
+    # Add a simple ground plane
+    def Xform "ground_plane"
+    {
+        def Mesh "plane"
+        {
+            int[] faceVertexCounts = [4, 4, 4, 4, 4, 4]
+            int[] faceVertexIndices = [0, 1, 3, 2, 4, 5, 7, 6, 8, 9, 11, 10, 12, 13, 15, 14, 16, 17, 19, 18, 20, 21, 23, 22]
+            normal3f[] normals = [(0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0), (0, 1, 0)]
+            float3[] points = [(-10, 0, -10), (-10, 0, 10), (10, 0, 10), (10, 0, -10), (-10, 0, -10), (-10, 0, 10), (10, 0, 10), (10, 0, -10), (-10, 0, -10), (-10, 0, 10), (10, 0, 10), (10, 0, -10), (-10, 0, -10), (-10, 0, 10), (10, 0, 10), (10, 0, -10), (-10, 0, -10), (-10, 0, 10), (10, 0, 10), (10, 0, -10), (-10, 0, -10), (-10, 0, 10), (10, 0, 10), (10, 0, -10)]
+            int[] extent = [0]
+            matrix4d xformOp:transform = ( ( 1, 0, 0, 0 ), ( 0, 1, 0, 0 ), ( 0, 0, 1, 0 ), ( 0, 0, 0, 1 ) )
+            add rel xformOpOrder = ["xformOp:transform"]
+        }
+    }
+}
+
+# Materials for visualization
+def Material "/World/Looks/defaultMaterial"
+{
+    def Shader "PreviewSurface"
+    {
+        uniform token info:id = "UsdPreviewSurface"
+        float inputs:roughness = 0.4
+        float3 inputs:diffuseColor = (0.8, 0.8, 0.8)
+        float3 inputs:specularColor = (0.1, 0.1, 0.1)
+    }
+
+    token outputs:surface.connect = </World/Looks/defaultMaterial/PreviewSurface.outputs:surface>
+}

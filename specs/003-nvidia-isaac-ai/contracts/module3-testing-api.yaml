@@ -1,0 +1,499 @@
+openapi: 3.0.0
+info:
+  title: Module 3 Testing API - NVIDIA Isaac (AI-Robot Brain)
+  description: API for validating Module 3 content on NVIDIA Isaac technologies
+  version: 1.0.0
+
+paths:
+  /validate/module3/build:
+    post:
+      summary: Validate Docusaurus build for Module 3
+      description: Check if Module 3 documentation builds without errors
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module to validate (specifically module-3-nvidia-isaac)
+                  example: "module-3-nvidia-isaac"
+      responses:
+        '200':
+          description: Module 3 build validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the Module 3 build was successful
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                    description: List of Module 3 build errors if any
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                    description: List of Module 3 build warnings
+
+  /validate/module3/formatting:
+    post:
+      summary: Validate formatting consistency in Module 3
+      description: Check MDX, Markdown, and code block formatting in Module 3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module 3 to validate
+                  example: "module-3-nvidia-isaac"
+                format_types:
+                  type: array
+                  items:
+                    type: string
+                    enum: [mdx, markdown, code_blocks, images, diagrams, pipelines]
+                  description: Types of formatting to validate in Module 3
+      responses:
+        '200':
+          description: Module 3 formatting validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  issues:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FormattingIssue'
+
+  /validate/module3/isaac-sim:
+    post:
+      summary: Validate Isaac Sim simulations for Module 3
+      description: Test Isaac Sim examples and simulations in Module 3 for proper behavior
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                simulation_path:
+                  type: string
+                  description: Path to the Isaac Sim simulation to validate
+                  example: "examples/isaac-sim-examples/perception_pipeline.py"
+                hardware_requirements:
+                  type: object
+                  description: Expected hardware capabilities
+                  properties:
+                    cuda_support:
+                      type: boolean
+                      description: Whether CUDA acceleration is required
+                    gpu_memory:
+                      type: integer
+                      description: Minimum GPU memory in GB
+                expected_behavior:
+                  type: string
+                  description: Expected simulation behavior
+                  example: "Photorealistic perception pipeline executes successfully"
+      responses:
+        '200':
+          description: Isaac Sim validation result for Module 3
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationValidationResult'
+
+  /validate/module3/isaac-ros:
+    post:
+      summary: Validate Isaac ROS components for Module 3
+      description: Test Isaac ROS examples in Module 3 for proper VSLAM and navigation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                component_path:
+                  type: string
+                  description: Path to the Isaac ROS component to validate
+                  example: "examples/isaac-ros-examples/vslam_pipeline.py"
+                expected_functionality:
+                  type: string
+                  enum: [vslam, navigation, perception, integration]
+                  description: Expected Isaac ROS functionality
+      responses:
+        '200':
+          description: Isaac ROS validation result for Module 3
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IsaacValidationResult'
+
+  /validate/module3/synthetic-data:
+    post:
+      summary: Validate synthetic data generation for Module 3
+      description: Test synthetic data generation examples in Module 3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                generation_script:
+                  type: string
+                  description: Path to the synthetic data generation script
+                  example: "examples/isaac-sim-examples/synthetic_data_gen.py"
+                data_quality_metrics:
+                  type: object
+                  description: Expected quality metrics for generated data
+                  properties:
+                    photorealism_score:
+                      type: number
+                      format: float
+                      minimum: 0.0
+                      maximum: 1.0
+                      description: Photorealism quality score (0-1)
+                    diversity_score:
+                      type: number
+                      format: float
+                      minimum: 0.0
+                      maximum: 1.0
+                      description: Data diversity score (0-1)
+      responses:
+        '200':
+          description: Synthetic data validation result for Module 3
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  quality_metrics:
+                    type: object
+                    description: Actual quality metrics achieved
+                    properties:
+                      photorealism_score:
+                        type: number
+                        format: float
+                        minimum: 0.0
+                        maximum: 1.0
+                      diversity_score:
+                        type: number
+                        format: float
+                        minimum: 0.0
+                        maximum: 1.0
+                  generation_time:
+                    type: number
+                    format: float
+                    description: Time taken to generate data in seconds
+
+  /validate/module3/vslam:
+    post:
+      summary: Validate VSLAM implementation for Module 3
+      description: Test Visual SLAM examples in Module 3 for proper mapping and localization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vslam_script:
+                  type: string
+                  description: Path to the VSLAM implementation
+                  example: "examples/isaac-ros-examples/vslam_pipeline.py"
+                mapping_accuracy:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                  maximum: 1.0
+                  description: Expected mapping accuracy threshold
+                localization_precision:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                  maximum: 1.0
+                  description: Expected localization precision threshold
+      responses:
+        '200':
+          description: VSLAM validation result for Module 3
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  mapping_accuracy:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Actual mapping accuracy achieved
+                  localization_precision:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Actual localization precision achieved
+                  execution_time:
+                    type: number
+                    format: float
+                    description: Time taken to execute VSLAM in seconds
+
+  /validate/module3/navigation:
+    post:
+      summary: Validate Nav2 navigation for Module 3
+      description: Test navigation examples in Module 3 for bipedal humanoid movement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nav_config:
+                  type: string
+                  description: Path to the navigation configuration
+                  example: "examples/isaac-ros-examples/nav2_config.yaml"
+                path_planning_accuracy:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                  maximum: 1.0
+                  description: Expected path planning accuracy
+                humanoid_movement_success:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                  maximum: 1.0
+                  description: Expected success rate for humanoid movement
+      responses:
+        '200':
+          description: Navigation validation result for Module 3
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  path_planning_accuracy:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                  humanoid_movement_success:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                  navigation_time:
+                    type: number
+                    format: float
+                    description: Time taken for navigation execution in seconds
+
+  /validate/module3/citations:
+    post:
+      summary: Validate citations and references for Module 3
+      description: Check that Module 3 citations follow APA style
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                module:
+                  type: string
+                  description: Module 3 to validate citations for
+                  example: "module-3-nvidia-isaac"
+      responses:
+        '200':
+          description: Module 3 citation validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  valid_citations:
+                    type: integer
+                    description: Number of valid citations in Module 3
+                  invalid_citations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Citation'
+                    description: Citations that don't follow APA style in Module 3
+                  peer_reviewed_count:
+                    type: integer
+                    description: Number of peer-reviewed citations in Module 3
+                  total_references:
+                    type: integer
+                    description: Total number of references in Module 3
+
+  /validate/module3/rag-content:
+    post:
+      summary: Validate RAG chatbot responses for Module 3
+      description: Test that RAG chatbot responds correctly to queries about Module 3 content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Query to test against Module 3 content
+                  example: "How do I set up VSLAM with Isaac ROS for humanoid navigation?"
+                expected_source:
+                  type: string
+                  description: Expected source document in Module 3
+                  example: "vslam-navigation.md"
+      responses:
+        '200':
+          description: Module 3 RAG validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  query:
+                    type: string
+                    description: The original query
+                  response:
+                    type: string
+                    description: The RAG chatbot's response
+                  source_accuracy:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Accuracy score for source attribution (0-1)
+                  content_relevance:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                    maximum: 1.0
+                    description: Relevance score for content (0-1)
+
+components:
+  schemas:
+    ValidationResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the validation was successful
+        details:
+          type: string
+          description: Additional validation details
+        execution_time:
+          type: number
+          format: float
+          description: Time taken to execute validation in seconds
+
+    SimulationValidationResult:
+      allOf:
+        - $ref: '#/components/schemas/ValidationResult'
+        - type: object
+          properties:
+            expected_behavior:
+              type: string
+              description: What the simulation should do
+            actual_behavior:
+              type: string
+              description: What the simulation actually did
+            match:
+              type: boolean
+              description: Whether expected and actual behavior match
+            platform:
+              type: string
+              enum: [isaac_sim, isaac_ros]
+              description: Platform where the simulation was tested
+            hardware_compliance:
+              type: boolean
+              description: Whether hardware requirements were met
+
+    IsaacValidationResult:
+      allOf:
+        - $ref: '#/components/schemas/ValidationResult'
+        - type: object
+          properties:
+            functionality_type:
+              type: string
+              enum: [vslam, navigation, perception, integration]
+              description: Type of Isaac functionality tested
+            performance_metrics:
+              type: object
+              description: Performance metrics for the Isaac component
+            hardware_requirements_met:
+              type: boolean
+              description: Whether hardware requirements were satisfied
+
+    FormattingIssue:
+      type: object
+      properties:
+        file_path:
+          type: string
+          description: Path to the file with the issue
+        line_number:
+          type: integer
+          description: Line number where the issue occurs
+        issue_type:
+          type: string
+          enum: [mdx_syntax, markdown_syntax, code_block, image_alt_text, link_broken, pipeline_diagram]
+          description: Type of formatting issue
+        description:
+          type: string
+          description: Description of the issue
+        severity:
+          type: string
+          enum: [error, warning]
+          description: Severity of the issue
+
+    Citation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the citation
+        title:
+          type: string
+          description: Title of the reference
+        authors:
+          type: array
+          items:
+            type: string
+          description: List of authors
+        year:
+          type: integer
+          description: Publication year
+        apa_citation:
+          type: string
+          description: The actual APA citation text
+        peer_reviewed:
+          type: boolean
+          description: Whether the citation is peer-reviewed
+        module:
+          type: string
+          description: Module where the citation is used

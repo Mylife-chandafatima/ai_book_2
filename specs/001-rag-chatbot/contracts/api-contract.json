@@ -1,0 +1,225 @@
+# API Contract: RAG Chatbot Service
+
+## Base URL
+`/api/v1`
+
+## Authentication
+All endpoints require no authentication for initial implementation.
+
+## Content-Type
+All requests and responses use `application/json` unless otherwise specified.
+
+---
+
+## Chat Endpoints
+
+### POST /chat/book
+
+**Description**: Submit a question for Book Mode Q&A (searches entire book corpus)
+
+**Request**:
+```json
+{
+  "question": "What is ROS 2 and how does it differ from ROS 1?",
+  "session_id": "session-12345",
+  "user_id": "user-67890"
+}
+```
+
+**Request Validation**:
+- `question`: Required, 10-500 characters
+- `session_id`: Optional, string identifier
+- `user_id`: Optional, string identifier
+
+**Response (Success)**:
+```json
+{
+  "response_id": "resp-abc123",
+  "answer": "ROS 2 is the next generation of the Robot Operating System...",
+  "citations": [
+    {
+      "module": "Module 1: The Robotic Nervous System (ROS 2)",
+      "chapter": "Introduction to ROS 2",
+      "section": "ROS 1 vs ROS 2",
+      "url": "/docs/module-1-ros2/index"
+    }
+  ],
+  "confidence_score": 0.89,
+  "was_refused": false,
+  "processing_time_ms": 1250
+}
+```
+
+**Response (Refusal)**:
+```json
+{
+  "response_id": "resp-def456",
+  "answer": null,
+  "citations": [],
+  "confidence_score": 0.0,
+  "was_refused": true,
+  "refusal_reason": "No relevant content found in the book corpus",
+  "processing_time_ms": 850
+}
+```
+
+**Response Validation**:
+- `response_id`: Required, UUID format
+- `answer`: Required if `was_refused` is false, null if true
+- `citations`: Required array of citation objects
+- `confidence_score`: Required float between 0.0-1.0
+- `was_refused`: Required boolean
+- `refusal_reason`: Required if `was_refused` is true
+- `processing_time_ms`: Required integer
+
+---
+
+### POST /chat/selection
+
+**Description**: Submit a question for Selection Mode Q&A (uses only user-selected text)
+
+**Request**:
+```json
+{
+  "question": "What are the key differences mentioned in this text?",
+  "selected_text": "ROS 2 introduces several key improvements over ROS 1. First, it provides better real-time support with improved timing guarantees...",
+  "session_id": "session-12345",
+  "user_id": "user-67890"
+}
+```
+
+**Request Validation**:
+- `question`: Required, 10-500 characters
+- `selected_text`: Required, 10-2000 characters
+- `session_id`: Optional, string identifier
+- `user_id`: Optional, string identifier
+
+**Response**:
+```json
+{
+  "response_id": "resp-ghi789",
+  "answer": "The key differences mentioned in the selected text include better real-time support, improved timing guarantees...",
+  "citations": [
+    {
+      "module": "Module 1: The Robotic Nervous System (ROS 2)",
+      "chapter": "Introduction to ROS 2",
+      "section": "ROS 1 vs ROS 2",
+      "url": "/docs/module-1-ros2/index"
+    }
+  ],
+  "confidence_score": 0.92,
+  "was_refused": false,
+  "processing_time_ms": 1100
+}
+```
+
+**Response (Refusal)**:
+```json
+{
+  "response_id": "resp-jkl012",
+  "answer": null,
+  "citations": [],
+  "confidence_score": 0.0,
+  "was_refused": true,
+  "refusal_reason": "Selected text does not contain relevant information for the question",
+  "processing_time_ms": 750
+}
+```
+
+---
+
+## Ingestion Endpoints
+
+### POST /ingest
+
+**Description**: Ingest and process book content from the docs/ folder
+
+**Request**:
+```json
+{
+  "force_reprocess": false,
+  "document_paths": ["/docs/module-1-ros2/index.md", "/docs/module-1-ros2/nodes-topics-services.md"]
+}
+```
+
+**Request Validation**:
+- `force_reprocess`: Optional boolean, default false
+- `document_paths`: Optional array of document paths, if empty processes all docs
+
+**Response**:
+```json
+{
+  "job_id": "ingest-job-xyz789",
+  "status": "processing",
+  "total_documents": 25,
+  "processed_documents": 3,
+  "failed_documents": 0,
+  "message": "Ingestion started successfully"
+}
+```
+
+**Response Validation**:
+- `job_id`: Required, string identifier
+- `status`: Required, one of "processing", "completed", "failed"
+- `total_documents`: Required, integer
+- `processed_documents`: Required, integer
+- `failed_documents`: Required, integer
+- `message`: Required, string description
+
+---
+
+## Health Endpoints
+
+### GET /health
+
+**Description**: Check the health status of the RAG service
+
+**Response**:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-12-16T10:30:00Z",
+  "services": {
+    "qdrant": "connected",
+    "neon": "connected",
+    "openai_router": "available"
+  },
+  "version": "1.0.0"
+}
+```
+
+**Response Validation**:
+- `status`: Required, one of "healthy", "degraded", "unhealthy"
+- `timestamp`: Required, ISO 8601 datetime format
+- `services`: Required object with service status
+- `version`: Required, semantic version string
+
+---
+
+## Statistics Endpoints
+
+### GET /stats
+
+**Description**: Get usage statistics for the RAG service
+
+**Response**:
+```json
+{
+  "total_queries": 1250,
+  "successful_queries": 1180,
+  "refused_queries": 70,
+  "avg_response_time_ms": 1150,
+  "active_sessions": 25,
+  "last_24h_queries": 180,
+  "accuracy_rate": 0.87
+}
+```
+
+**Response Validation**:
+- `total_queries`: Required, non-negative integer
+- `successful_queries`: Required, non-negative integer
+- `refused_queries`: Required, non-negative integer
+- `avg_response_time_ms`: Required, positive float
+- `active_sessions`: Required, non-negative integer
+- `last_24h_queries`: Required, non-negative integer
+- `accuracy_rate`: Required, float between 0.0-1.0
