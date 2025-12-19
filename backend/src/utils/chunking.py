@@ -1,10 +1,15 @@
 import re
+import logging
 from typing import List, Dict, Any
 from dataclasses import dataclass
+from uuid import uuid4
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
-class DocumentChunk:
+class DocumentChunkData:
     """Represents a chunk of a document with metadata"""
     content: str
     module: str
@@ -14,7 +19,7 @@ class DocumentChunk:
     metadata: Dict[str, Any]
 
 
-def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int = 600) -> List[DocumentChunk]:
+def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int = 600) -> List[DocumentChunkData]:
     """
     Split markdown content into chunks based on headings while preserving document structure.
 
@@ -24,7 +29,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
         max_chunk_size: Maximum size of each chunk in tokens/characters
 
     Returns:
-        List of DocumentChunk objects
+        List of DocumentChunkData objects
     """
     chunks = []
 
@@ -52,7 +57,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
                 chunk_text = '\n'.join(current_content).strip()
                 if len(chunk_text) > 0:
                     chunks.append(
-                        DocumentChunk(
+                        DocumentChunkData(
                             content=chunk_text,
                             module=module,
                             chapter=chapter,
@@ -74,7 +79,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
         chunk_text = '\n'.join(current_content).strip()
         if len(chunk_text) > 0:
             chunks.append(
-                DocumentChunk(
+                DocumentChunkData(
                     content=chunk_text,
                     module=module,
                     chapter=chapter,
@@ -101,7 +106,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
                     # Save current sub-chunk and start a new one
                     if current_sub_chunk:
                         final_chunks.append(
-                            DocumentChunk(
+                            DocumentChunkData(
                                 content='\n\n'.join(current_sub_chunk),
                                 module=chunk.module,
                                 chapter=chunk.chapter,
@@ -126,7 +131,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
                             else:
                                 if temp_para:
                                     final_chunks.append(
-                                        DocumentChunk(
+                                        DocumentChunkData(
                                             content=temp_para.strip(),
                                             module=chunk.module,
                                             chapter=chunk.chapter,
@@ -145,7 +150,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
             # Add remaining content if any
             if current_sub_chunk:
                 final_chunks.append(
-                    DocumentChunk(
+                    DocumentChunkData(
                         content='\n\n'.join(current_sub_chunk),
                         module=chunk.module,
                         chapter=chunk.chapter,
@@ -158,6 +163,7 @@ def chunk_markdown_content(content: str, document_path: str, max_chunk_size: int
         else:
             final_chunks.append(chunk)
 
+    logger.info(f"Chunked document {document_path} into {len(final_chunks)} chunks")
     return final_chunks
 
 

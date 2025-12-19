@@ -18,12 +18,22 @@ class DatabaseSettings(BaseSettings):
 db_settings = DatabaseSettings()
 
 # Create database engine
-engine = create_engine(
-    db_settings.neon_database_url,
-    pool_pre_ping=True,
-    pool_recycle=300,
-    echo=False  # Set to True for debugging SQL queries
-)
+# Check if using SQLite (for development) or PostgreSQL (for production)
+if db_settings.neon_database_url.startswith("sqlite"):
+    # SQLite configuration
+    engine = create_engine(
+        db_settings.neon_database_url,
+        connect_args={"check_same_thread": False},  # Required for SQLite
+        echo=False  # Set to True for debugging SQL queries
+    )
+else:
+    # PostgreSQL configuration
+    engine = create_engine(
+        db_settings.neon_database_url,
+        pool_pre_ping=True,
+        pool_recycle=300,
+        echo=False  # Set to True for debugging SQL queries
+    )
 
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

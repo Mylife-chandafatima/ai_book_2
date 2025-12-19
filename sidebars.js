@@ -11,15 +11,14 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'Module 1: The Robotic Nervous System (ROS 2)',
+      label: 'Module 1: Introduction to Physical AI',
       collapsible: true,
       collapsed: false,
       items: [
-        'module-1-ros2/index',
-        'module-1-ros2/nodes-topics-services',
-        'module-1-ros2/rclpy-bridge',
-        'module-1-ros2/urdf-models',
-        'module-1-ros2/practical-examples',
+        'modules/module-1/introduction',
+        'modules/module-1/robotics-basics',
+        'modules/module-1/ai-foundations',
+        'modules/module-1/humanoid-design-principles',
       ],
     },
     {

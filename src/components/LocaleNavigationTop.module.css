@@ -1,0 +1,40 @@
+.localeNavigationTop {
+  background-color: var(--ifm-color-emphasis-200, #f0f0f0);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300, #e0e0e0);
+}
+
+[data-theme='dark'] .localeNavigationTop {
+  background-color: var(--ifm-color-emphasis-800, #333);
+  border-bottom: 1px solid var(--ifm-color-emphasis-700, #444);
+}
+
+.localeNavigationTopInner {
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.localeNavLink {
+  color: var(--ifm-color-primary, #2e8555) !important;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.localeNavLink:hover {
+  background-color: var(--ifm-color-emphasis-300, #e0e0e0);
+  text-decoration: underline !important;
+}
+
+[data-theme='dark'] .localeNavLink:hover {
+  background-color: var(--ifm-color-emphasis-700, #444);
+}
+
+/* RTL support */
+html[dir='rtl'] .localeNavigationTopInner {
+  direction: rtl;
+}

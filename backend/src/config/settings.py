@@ -13,12 +13,8 @@ class Settings(BaseSettings):
     # Neon Postgres Configuration
     neon_database_url: str = os.getenv("NEON_DATABASE_URL", "")
 
-    # OpenAI Router Configuration
-    openai_router_api_key: str = os.getenv("OPENAI_ROUTER_API_KEY", "")
-    openai_router_base_url: str = os.getenv("OPENAI_ROUTER_BASE_URL", "")
-
-    # Qwen Embedding Model
-    qwen_embedding_model: str = os.getenv("QWEN_EMBEDDING_MODEL", "qwen-embedding-v1")
+    # Cohere Configuration
+    cohere_api_key: str = os.getenv("COHERE_API_KEY", "")
 
     # Application Settings
     log_level: str = os.getenv("LOG_LEVEL", "INFO")

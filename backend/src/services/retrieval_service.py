@@ -6,7 +6,9 @@ from src.config.settings import settings
 from src.config.neon_schema import SearchResultDB
 from src.models.search_result import SearchResult
 from src.models.document_chunk import DocumentChunk
+from src.services.embedding_service import embedding_service
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 
 logger = logging.getLogger(__name__)
@@ -16,8 +18,15 @@ class RetrievalService:
     """Service for retrieving relevant document chunks based on user queries"""
 
     def __init__(self):
+        # Validate settings
+        if not settings.qdrant_url or not settings.qdrant_collection_name:
+            logger.error("QDRANT_URL or QDRANT_COLLECTION_NAME not set in environment variables")
+            raise ValueError("QDRANT_URL and QDRANT_COLLECTION_NAME are required")
+
         self.qdrant_client = get_qdrant_client()
         self.collection_name = settings.qdrant_collection_name
+
+        logger.info(f"Successfully initialized RetrievalService with collection: {self.collection_name}")
 
     def search_in_qdrant(self, query_text: str, top_k: int = 5, threshold: float = 0.5) -> List[dict]:
         """
@@ -32,9 +41,9 @@ class RetrievalService:
             List of search results with payload and similarity scores
         """
         try:
-            # Generate embedding for the query text
-            # In a real implementation, this would call the Qwen embedding API
-            # For now, we'll use a mock embedding function
+            logger.info(f"Starting Qdrant search for query: '{query_text[:50]}...' with top_k={top_k}")
+
+            # Generate embedding for the query text using Cohere
             query_embedding = self.generate_query_embedding(query_text)
 
             # Perform search in Qdrant
@@ -64,11 +73,12 @@ class RetrievalService:
 
         except Exception as e:
             logger.error(f"Error searching in Qdrant: {str(e)}")
+            logger.exception("Full traceback for Qdrant search error:")
             return []
 
     def generate_query_embedding(self, query_text: str) -> List[float]:
         """
-        Generate embedding for query text using Qwen model.
+        Generate embedding for query text using Cohere model.
 
         Args:
             query_text: Text to generate embedding for
@@ -76,11 +86,19 @@ class RetrievalService:
         Returns:
             List of embedding values
         """
-        # In a real implementation, this would call the Qwen embedding API
-        # For now, we'll return a mock embedding (1536 dimensions as is typical for Qwen)
-        # This is a placeholder - in real implementation you'd call the actual embedding service
-        import random
-        return [random.random() for _ in range(1536)]
+        try:
+            logger.info(f"Generating query embedding for text of length {len(query_text)}")
+            embedding = embedding_service.generate_query_embedding(query_text)
+            logger.info(f"Successfully generated query embedding of size {len(embedding)}")
+            return embedding
+        except Exception as e:
+            logger.error(f"Error generating query embedding: {str(e)}")
+            logger.exception("Full traceback for query embedding error:")
+            # As fallback, return a random embedding of correct size (1024 for Cohere)
+            import random
+            fallback_embedding = [random.random() for _ in range(1024)]
+            logger.warning(f"Using fallback embedding due to error. Fallback vector size: {len(fallback_embedding)}")
+            return fallback_embedding
 
     def retrieve_for_book_mode(self, query_text: str, db: Session, top_k: int = 5) -> List[DocumentChunk]:
         """
@@ -95,6 +113,8 @@ class RetrievalService:
             List of relevant DocumentChunk objects
         """
         try:
+            logger.info(f"Starting Book Mode retrieval for query: '{query_text[:50]}...'")
+
             # Perform semantic search in Qdrant
             search_results = self.search_in_qdrant(query_text, top_k=top_k)
 
@@ -118,6 +138,7 @@ class RetrievalService:
 
         except Exception as e:
             logger.error(f"Error retrieving for Book Mode: {str(e)}")
+            logger.exception("Full traceback for Book Mode retrieval error:")
             return []
 
     def retrieve_for_selection_mode(self, query_text: str, selected_text: str, db: Session, top_k: int = 3) -> List[DocumentChunk]:
@@ -134,9 +155,7 @@ class RetrievalService:
             List of relevant DocumentChunk objects based only on selected text
         """
         try:
-            # For selection mode, we only consider the selected text as context
-            # Create a document chunk from the selected text
-            from uuid import uuid4
+            logger.info(f"Starting Selection Mode retrieval for query: '{query_text[:50]}...' with selected text length: {len(selected_text)}")
 
             # Process the selected text to make sure it's properly formatted
             processed_text = selected_text.strip()
@@ -162,6 +181,7 @@ class RetrievalService:
 
         except Exception as e:
             logger.error(f"Error retrieving for Selection Mode: {str(e)}")
+            logger.exception("Full traceback for Selection Mode retrieval error:")
             return []
 
     def apply_strict_context_filtering(self, chunks: List[DocumentChunk], selected_text: str) -> List[DocumentChunk]:
@@ -176,6 +196,8 @@ class RetrievalService:
             Filtered list of chunks that are relevant to the selected text
         """
         try:
+            logger.info(f"Applying strict context filtering for {len(chunks)} chunks with selected text")
+
             # In selection mode, we only want to use the selected text as context
             # So we filter out any chunks that are not based on the selected text
             filtered_chunks = []
@@ -192,6 +214,7 @@ class RetrievalService:
 
         except Exception as e:
             logger.error(f"Error applying strict context filtering: {str(e)}")
+            logger.exception("Full traceback for context filtering error:")
             # Return original chunks if filtering fails
             return chunks
 
@@ -207,6 +230,7 @@ class RetrievalService:
         Returns:
             Filtered list of relevant chunks
         """
+        logger.info(f"Filtering {len(chunks)} chunks by relevance with threshold {threshold}")
         # In a real implementation, this would use more sophisticated relevance filtering
         # For now, we'll return all chunks since we don't have a way to re-rank them without additional calls
         return chunks
@@ -223,6 +247,8 @@ class RetrievalService:
             Dictionary mapping chunk IDs to their metadata
         """
         try:
+            logger.info(f"Joining metadata from Neon for {len(chunk_ids)} chunk IDs")
+
             # Query the database for chunk metadata
             chunk_metadata = {}
             for chunk_id in chunk_ids:
@@ -234,4 +260,5 @@ class RetrievalService:
 
         except Exception as e:
             logger.error(f"Error joining metadata from Neon: {str(e)}")
+            logger.exception("Full traceback for metadata joining error:")
             return {}

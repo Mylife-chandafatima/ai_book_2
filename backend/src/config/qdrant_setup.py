@@ -32,10 +32,10 @@ def initialize_qdrant_collection():
             logger.info(f"Collection '{collection_name}' does not exist, creating...")
 
         # Create collection for document embeddings
-        # For Qwen embeddings, the dimension is typically 1536
+        # For Cohere embed-english-v3.0, the dimension is 1024
         client.recreate_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=1024, distance=Distance.COSINE),
         )
 
         logger.info(f"Successfully created Qdrant collection: {collection_name}")

@@ -1,23 +1,36 @@
 import logging
 from typing import List, Optional
-from openai import OpenAI
+import cohere
 from src.models.document_chunk import DocumentChunk
 from src.models.response import Response, Citation
 from src.config.settings import settings
 from src.services.citation_service import CitationService
+import os
 
 
 logger = logging.getLogger(__name__)
 
 
 class GenerationService:
-    """Service for generating responses using LLM and handling citations"""
+    """Service for generating responses using Cohere LLM and handling citations"""
 
     def __init__(self):
-        self.openai_client = OpenAI(
-            api_key=settings.openai_router_api_key,
-            base_url=settings.openai_router_base_url
-        )
+        # Validate required environment variables
+        if not settings.cohere_api_key:
+            logger.error("COHERE_API_KEY is not set in environment variables")
+            raise ValueError("COHERE_API_KEY is required")
+
+        logger.info(f"Initializing Cohere client with API key: {'*' * (len(settings.cohere_api_key) - 4) + settings.cohere_api_key[-4:]}")
+
+        try:
+            self.cohere_client = cohere.Client(
+                api_key=settings.cohere_api_key
+            )
+            logger.info("Successfully initialized Cohere client")
+        except Exception as e:
+            logger.error(f"Failed to initialize Cohere client: {str(e)}")
+            raise
+
         self.citation_service = CitationService()
 
     def create_context_prompt(self, chunks: List[DocumentChunk], query: str, mode: str = "book") -> str:
@@ -34,9 +47,9 @@ class GenerationService:
         """
         if not chunks:
             if mode == "book":
-                return f"Question: {query}\n\nContext: No relevant information found in the book.\n\nPlease respond that you cannot find relevant information in the book to answer this question."
+                return f"Question: {query}\n\nContext: No relevant information found in the book.\n\nPlease respond with: 'I don't know based on the book.'"
             else:  # selection mode
-                return f"Question: {query}\n\nSelected Text: \n\nPlease respond that the selected text does not contain relevant information for the question."
+                return f"Question: {query}\n\nSelected Text: \n\nPlease respond with: 'I don't know based on the selected text.'"
 
         # Build context from chunks
         context_parts = []
@@ -54,7 +67,7 @@ class GenerationService:
         if mode == "book":
             prompt = (
                 f"Please answer the following question based ONLY on the provided context from the book. "
-                f"If the context does not contain enough information to answer the question, please say so explicitly. "
+                f"IMPORTANT: If the context does not contain enough information to answer the question, respond EXACTLY with: 'I don't know based on the book.' "
                 f"Do not make up information that is not in the context.\n\n"
                 f"Question: {query}\n\n"
                 f"Context:\n{context}\n\n"
@@ -65,7 +78,7 @@ class GenerationService:
             selected_content = chunks[0].content if chunks else ''
             prompt = (
                 f"Please answer the following question based ONLY on the provided selected text. "
-                f"If the selected text does not contain enough information to answer the question, please say so explicitly. "
+                f"IMPORTANT: If the selected text does not contain enough information to answer the question, respond EXACTLY with: 'I don't know based on the selected text.' "
                 f"Do not make up information that is not in the selected text.\n\n"
                 f"Question: {query}\n\n"
                 f"Selected Text: {selected_content}\n\n"
@@ -106,7 +119,7 @@ class GenerationService:
 
     def call_llm(self, prompt: str) -> str:
         """
-        Call the LLM to generate a response.
+        Call the Cohere LLM to generate a response.
 
         Args:
             prompt: Formatted prompt to send to the LLM
@@ -115,20 +128,18 @@ class GenerationService:
             Generated response text
         """
         try:
-            response = self.openai_client.chat.completions.create(
-                model=settings.qwen_embedding_model,  # In a real implementation, this would be the actual LLM model
-                messages=[
-                    {"role": "system", "content": "You are a helpful assistant that answers questions based only on the provided context. Do not make up information that is not in the context. Always provide citations to the specific modules and chapters where you found the information."},
-                    {"role": "user", "content": prompt}
-                ],
+            response = self.cohere_client.chat(
+                message=prompt,
+                model="command-r-plus",  # Using Cohere Command R Plus
                 temperature=0.3,
-                max_tokens=1000
+                max_tokens=1000,
+                preamble="You are a helpful assistant that answers questions based only on the provided context. Do not make up information that is not in the context. Always provide citations to the specific modules and chapters where you found the information."
             )
 
-            return response.choices[0].message.content
+            return response.text
 
         except Exception as e:
-            logger.error(f"Error calling LLM: {str(e)}")
+            logger.error(f"Error calling Cohere LLM: {str(e)}")
             return "I encountered an error while processing your request. Please try again later."
 
     def extract_citations(self, response_text: str, chunks: List[DocumentChunk]) -> List[Citation]:
@@ -201,7 +212,8 @@ class GenerationService:
                 "cannot find",
                 "not enough information",
                 "not in the context",
-                "no information found"
+                "no information found",
+                "i don't know based on the book",
             ]
 
             was_refused = any(indicator.lower() in raw_response.lower() for indicator in no_info_indicators)
@@ -267,7 +279,8 @@ class GenerationService:
                 "not enough information",
                 "not in the context",
                 "no information found",
-                "selected text does not contain"
+                "selected text does not contain",
+                "i don't know based on the selected text",
             ]
 
             was_refused = any(indicator.lower() in raw_response.lower() for indicator in no_info_indicators)

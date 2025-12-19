@@ -29,7 +29,17 @@ const config = {
   // to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en', 'ur'],
+    localeConfigs: {
+      en: {
+        label: 'English',
+        direction: 'ltr',
+      },
+      ur: {
+        label: 'اردو',
+        direction: 'rtl',
+      },
+    },
   },
 
   presets: [
@@ -59,12 +69,14 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
       // Add custom fields for chatbot
       customFields: {
         enableChatbot: true,
       },
+      metadata: [
+        { name: 'keywords', content: 'ai, robotics, machine learning, book' },
+      ],
       navbar: {
         title: '🤖 Physical AI & Robotics',
         logo: {
@@ -84,6 +96,10 @@ const config = {
             position: 'left',
           },
           {
+            type: 'localeDropdown',
+            position: 'right',
+          },
+          {
             href: 'https://github.com/Mylife-chandafatima',
             label: 'GitHub Profile',
             position: 'right',
@@ -94,6 +110,11 @@ const config = {
             position: 'right',
           },
         ],
+      },
+      colorMode: {
+        defaultMode: 'light',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
       },
       footer: {
         style: 'dark',

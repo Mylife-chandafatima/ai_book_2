@@ -8,11 +8,13 @@ from datetime import datetime
 
 from src.models.document_chunk import DocumentChunk
 from src.models.document_metadata import DocumentMetadata
-from src.utils.chunking import chunk_markdown_content
+from src.utils.chunking import chunk_markdown_content, DocumentChunkData
 from src.config.qdrant_setup import get_qdrant_client
 from src.config.settings import settings
 from src.config.neon_schema import DocumentChunkDB, DocumentMetadataDB
+from src.services.embedding_service import embedding_service
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 
 logger = logging.getLogger(__name__)
@@ -76,19 +78,20 @@ class IngestionService:
             chapter = path_parts[-1].replace('.md', '').replace('.mdx', '') if path_parts else "Unknown Chapter"
 
             # Chunk the content
-            chunks = chunk_markdown_content(content, str(file_path))
+            chunk_data_list = chunk_markdown_content(content, str(file_path))
 
             # Convert to DocumentChunk objects with proper document_id
             document_chunks = []
-            for i, chunk in enumerate(chunks):
+            for i, chunk_data in enumerate(chunk_data_list):
                 document_chunk = DocumentChunk(
                     document_id=document_id,
-                    module=chunk.module,
-                    chapter=chunk.chapter,
-                    section=chunk.section,
-                    content=chunk.content,
-                    position=chunk.position,
-                    metadata=chunk.metadata
+                    module=chunk_data.module,
+                    chapter=chunk_data.chapter,
+                    section=chunk_data.section,
+                    content=chunk_data.content,
+                    position=chunk_data.position,
+                    metadata=chunk_data.metadata,
+                    chunk_id=uuid4()
                 )
                 document_chunks.append(document_chunk)
 
@@ -115,7 +118,7 @@ class IngestionService:
 
     def generate_embeddings(self, text: str) -> List[float]:
         """
-        Generate embeddings for text using Qwen model.
+        Generate embeddings for text using Cohere model.
 
         Args:
             text: Text to generate embeddings for
@@ -123,11 +126,13 @@ class IngestionService:
         Returns:
             List of embedding values
         """
-        # In a real implementation, this would call the Qwen embedding API
-        # For now, we'll return a mock embedding (1536 dimensions as is typical for Qwen)
-        # This is a placeholder - in real implementation you'd call the actual embedding service
-        import random
-        return [random.random() for _ in range(1536)]
+        try:
+            embedding = embedding_service.generate_document_embedding(text)
+            logger.info(f"Generated embedding for text of length {len(text)}")
+            return embedding
+        except Exception as e:
+            logger.error(f"Error generating embedding for text: {str(e)}")
+            raise
 
     def store_chunks_in_qdrant(self, chunks: List[DocumentChunk]) -> bool:
         """
@@ -141,9 +146,13 @@ class IngestionService:
         """
         try:
             points = []
-            for chunk in chunks:
+            for i, chunk in enumerate(chunks):
+                logger.debug(f"Processing chunk {i+1}/{len(chunks)} for embedding generation")
+
                 # Generate embedding for the chunk content
                 embedding = self.generate_embeddings(chunk.content)
+
+                logger.debug(f"Generated embedding of size {len(embedding)} for chunk {i+1}")
 
                 # Create a Qdrant point
                 point = models.PointStruct(
@@ -161,6 +170,10 @@ class IngestionService:
                 )
                 points.append(point)
 
+                logger.debug(f"Created Qdrant point for chunk {i+1} with ID: {chunk.chunk_id}")
+
+            logger.info(f"Uploading {len(points)} chunks to Qdrant collection: {self.collection_name}")
+
             # Upload points to Qdrant
             self.qdrant_client.upsert(
                 collection_name=self.collection_name,
@@ -172,6 +185,7 @@ class IngestionService:
 
         except Exception as e:
             logger.error(f"Error storing chunks in Qdrant: {str(e)}")
+            logger.exception("Full traceback for Qdrant storage error:")
             return False
 
     def store_metadata_in_neon(self, db: Session, chunks: List[DocumentChunk], metadata: DocumentMetadata) -> bool:
