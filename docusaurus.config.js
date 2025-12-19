@@ -20,6 +20,7 @@ const config = {
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'Mylife-chandafatima', // Usually your GitHub org/user name.
   projectName: 'ai_book_2', // Usually your repo name.
+  trailingSlash: true, // Add trailing slash to avoid GitHub Pages redirect issues
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
